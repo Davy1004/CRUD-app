@@ -1,0 +1,473 @@
+{
+  "info": {
+    "_postman_id": "crud-app-collection",
+    "name": "CRUD App API Testing",
+    "description": "Complete testing collection for Flask CRUD API with all operations and validations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/health",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "health"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response contains status field', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.have.property('status');",
+              "  pm.expect(jsonData.status).to.equal('API is running');",
+              "});",
+              "",
+              "pm.test('Response time is less than 200ms', function () {",
+              "  pm.expect(pm.response.responseTime).to.be.below(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get All Users",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/users",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response is an array', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(Array.isArray(jsonData)).to.be.true;",
+              "});",
+              "",
+              "pm.test('Each user has required fields', function () {",
+              "  const jsonData = pm.response.json();",
+              "  jsonData.forEach(function(user) {",
+              "    pm.expect(user).to.have.property('id');",
+              "    pm.expect(user).to.have.property('name');",
+              "    pm.expect(user).to.have.property('email');",
+              "  });",
+              "});",
+              "",
+              "pm.test('Store user count for later use', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.environment.set('user_count', jsonData.length);",
+              "  if (jsonData.length > 0) {",
+              "    pm.environment.set('first_user_id', jsonData[0].id);",
+              "  }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create New User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\\n  \\\"name\\\": \\\"{{user_name}}\\\",\\n  \\\"email\\\": \\\"{{user_email}}\\\",\\n  \\\"phone\\\": \\\"{{user_phone}}\\\",\\n  \\\"address\\\": \\\"{{user_address}}\\\"\\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201 (Created)', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('Response has success message', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.have.property('message');",
+              "  pm.expect(jsonData.message).to.include('created successfully');",
+              "});",
+              "",
+              "pm.test('User object has all fields', function () {",
+              "  const jsonData = pm.response.json();",
+              "  const user = jsonData.user;",
+              "  pm.expect(user).to.have.property('id');",
+              "  pm.expect(user).to.have.property('name');",
+              "  pm.expect(user).to.have.property('email');",
+              "  pm.expect(user).to.have.property('phone');",
+              "  pm.expect(user).to.have.property('address');",
+              "});",
+              "",
+              "pm.test('Save created user ID for future tests', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.environment.set('created_user_id', jsonData.user.id);",
+              "  pm.environment.set('created_user_email', jsonData.user.email);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get User by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/users/{{created_user_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "{{created_user_id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Returned user has correct ID', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.id).to.equal(parseInt(pm.environment.get('created_user_id')));",
+              "});",
+              "",
+              "pm.test('User data is complete', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.have.property('id');",
+              "  pm.expect(jsonData).to.have.property('name');",
+              "  pm.expect(jsonData).to.have.property('email');",
+              "  pm.expect(jsonData).to.have.property('created_at');",
+              "  pm.expect(jsonData).to.have.property('updated_at');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update User",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\\n  \\\"name\\\": \\\"{{update_name}}\\\",\\n  \\\"email\\\": \\\"{{created_user_email}}\\\",\\n  \\\"phone\\\": \\\"555-9999\\\",\\n  \\\"address\\\": \\\"Updated Address\\\"\\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users/{{created_user_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "{{created_user_id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has success message', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.have.property('message');",
+              "  pm.expect(jsonData.message).to.include('updated successfully');",
+              "});",
+              "",
+              "pm.test('Updated user has new values', function () {",
+              "  const jsonData = pm.response.json();",
+              "  const user = jsonData.user;",
+              "  pm.expect(user.name).to.equal(pm.environment.get('update_name'));",
+              "  pm.expect(user.phone).to.equal('555-9999');",
+              "  pm.expect(user.address).to.equal('Updated Address');",
+              "});",
+              "",
+              "pm.test('Updated_at timestamp is newer', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData.user).to.have.property('updated_at');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete User",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/users/{{created_user_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "{{created_user_id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has success message', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.have.property('message');",
+              "  pm.expect(jsonData.message).to.include('deleted successfully');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error - Get Non-existent User",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/users/99999",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "99999"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 404', function () {",
+              "  pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test('Response has error message', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.have.property('error');",
+              "  pm.expect(jsonData.error).to.include('not found');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error - Missing Required Fields",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\\n  \\\"name\\\": \\\"Test User\\\"\\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 400 (Bad Request)', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Response has error about missing email', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.have.property('error');",
+              "  pm.expect(jsonData.error).to.include('email');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error - Invalid Email Format",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\\n  \\\"name\\\": \\\"Test User\\\",\\n  \\\"email\\\": \\\"not-an-email\\\"\\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/users",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "users"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 400 (Bad Request)', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Response indicates invalid email format', function () {",
+              "  const jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.have.property('error');",
+              "  pm.expect(jsonData.error.toLowerCase()).to.include('email');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "user_name",
+      "value": "Test User",
+      "type": "string"
+    },
+    {
+      "key": "user_email",
+      "value": "testuser@example.com",
+      "type": "string"
+    },
+    {
+      "key": "user_phone",
+      "value": "555-1234",
+      "type": "string"
+    },
+    {
+      "key": "user_address",
+      "value": "123 Test Street",
+      "type": "string"
+    },
+    {
+      "key": "update_name",
+      "value": "Updated Test User",
+      "type": "string"
+    },
+    {
+      "key": "created_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "created_user_email",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

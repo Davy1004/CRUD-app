@@ -1,0 +1,145 @@
+# Python Virtual Environment
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+*.py[cod]
+__pycache__/
+*.so
+.Python
+
+# Python
+*.egg
+*.whl
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Flask
+instance/
+.webassets-cache
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+database/
+*.db
+*.sqlite
+
+# Angular / Node.js
+node_modules/
+dist/
+.angular/
+
+yarn.lock
+
+# Angular build outputs
+/dist/
+/tmp/
+/out-tsc/
+/bazel-out
+
+# IDE / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-workspace
+*.sublime-project
+.history/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+desktop.ini
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Postman
+postman_environment.json
+postman_collection.json
+
+# Yarn
+.yarn-integrity
+.yarn/
+.yarnrc.yml
+
+# Testing
+.nyc_output/
+coverage/
+.karma-runner.properties
+
+# Build artifacts
+*.min.js
+*.min.css
+
+# Dependencies
+/backend/venv/
+/backend/ENV/
+
+# Angular specific
+.angular/
+.sass-cache/
+connect.lock
+coverage/
+libpeerconnection.log
+testem.log
+
+# Flask specific
+instance/
+.webassets-cache
+
+# Misc
+.cache
+.parcel-cache
+.next
+out
+.nuxt
+.cache/
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+.venv/
+env.bak/
+venv.bak/
+
+
+POSTMAN_TESTING_GUIDE.md
+CODE_REVIEW_AND_REFACTORING.md
+COMPLETION_REPORT.md
+ANGULAR_DEBUGGING_GUIDE.md
