@@ -27,8 +27,7 @@ def create_app(config_name='development'):
 
     # Enable CORS
     CORS(
-        app,
-        resources={r"/*": {"origins": "http://localhost:4200"}}
+        app
     )
 
     # Request/Response logging middleware
@@ -70,6 +69,7 @@ def create_app(config_name='development'):
     return app
 
 
+app = create_app('development')
+
 if __name__ == "__main__":
-    app = create_app('development')
-    app.logger.info("Starting Flask development server...")
+    app.run(host="0.0.0.0", port=5000)
