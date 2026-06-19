@@ -1,3 +1,4 @@
+import 'zone.js';  // ← add this as the FIRST line
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';
