@@ -1,12 +1,14 @@
-import os
+import time
+import traceback
+
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
+from werkzeug.exceptions import HTTPException
+
 from database.db import db
 from config import config
 from routes.user_routes import user_bp
 from logger_config import LoggerSetup, get_logger
-import time
-import traceback
 
 # Initialize logger
 logger = get_logger(__name__)
@@ -17,7 +19,9 @@ def create_app(config_name='development'):
     app = Flask(__name__)
 
     # Load configuration
-    app.config.from_object(config.get(config_name, config['development']))
+    app.config.from_object(
+        config.get(config_name, config['development'])
+    )
 
     # Setup logging
     LoggerSetup.setup_logging(app)
@@ -26,50 +30,102 @@ def create_app(config_name='development'):
     db.init_app(app)
 
     # Enable CORS
-    CORS(
-        app
-    )
+    CORS(app)
 
-    # Request/Response logging middleware
+    # -------------------------
+    # Request Logging
+    # -------------------------
     @app.before_request
     def log_request_info():
-        """Log incoming request information"""
         g.start_time = time.time()
-        app.logger.debug(f"REQUEST: {request.method} {request.path}")
-        app.logger.debug(f"Headers: {dict(request.headers)}")
-        if request.method in ['POST', 'PUT'] and request.is_json:
-            app.logger.debug(f"Body: {request.get_json()}")
 
+        app.logger.debug(
+            f"REQUEST: {request.method} {request.path}"
+        )
+
+        if request.method in ['POST', 'PUT'] and request.is_json:
+            app.logger.debug(
+                f"Body: {request.get_json()}"
+            )
+
+    # -------------------------
+    # Response Logging
+    # -------------------------
     @app.after_request
     def log_response_info(response):
-        """Log response information"""
         if hasattr(g, 'start_time'):
             elapsed = time.time() - g.start_time
+
             app.logger.info(
                 f"RESPONSE: {request.method} {request.path} - "
-                f"Status: {response.status_code} - Time: {elapsed:.3f}s"
+                f"Status: {response.status_code} - "
+                f"Time: {elapsed:.3f}s"
             )
+
         return response
 
+    # -------------------------
+    # Home Route
+    # -------------------------
+    @app.route('/')
+    def home():
+        return jsonify({
+            "message": "CRUD API is running successfully",
+            "status": "healthy"
+        })
+
+    # -------------------------
+    # Error Handler
+    # -------------------------
     @app.errorhandler(Exception)
     def handle_error(error):
-        """Global error handler"""
-        app.logger.error(f"UNHANDLED ERROR: {str(error)}")
-        app.logger.error(traceback.format_exc())
-        return jsonify({'error': 'Internal server error'}), 500
 
-    # Register blueprints
-    app.register_blueprint(user_bp, url_prefix='/api')
+        # Handle normal HTTP errors (404, 405, etc.)
+        if isinstance(error, HTTPException):
+            return jsonify({
+                "error": error.description
+            }), error.code
 
-    # Create database tables
+        # Handle unexpected errors
+        app.logger.error(
+            f"UNHANDLED ERROR: {str(error)}"
+        )
+
+        app.logger.error(
+            traceback.format_exc()
+        )
+
+        return jsonify({
+            "error": "Internal server error"
+        }), 500
+
+    # -------------------------
+    # Register Blueprints
+    # -------------------------
+    app.register_blueprint(
+        user_bp,
+        url_prefix='/api'
+    )
+
+    # -------------------------
+    # Create Database Tables
+    # -------------------------
     with app.app_context():
         db.create_all()
-        app.logger.info("Database tables initialized")
+        app.logger.info(
+            "Database tables initialized"
+        )
 
     return app
 
 
+# Global app instance for Gunicorn
 app = create_app('development')
 
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=False
+    )
