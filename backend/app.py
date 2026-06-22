@@ -6,6 +6,11 @@ from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
 from database.db import db
+# Import models so SQLAlchemy registers them before db.create_all().
+# Without these imports the projects/tasks tables are silently never created.
+from models.user import User
+from models.project import Project
+from models.task import Task
 from config import config
 from routes.user_routes import user_bp
 from logger_config import LoggerSetup, get_logger
@@ -120,7 +125,11 @@ def create_app(config_name='development'):
 
 
 # Global app instance for Gunicorn
-app = create_app('development')
+# Global app instance for Gunicorn.
+# On Render, set FLASK_CONFIG=production so ProductionConfig (Postgres) is used.
+# Defaults to development locally.
+import os
+app = create_app(os.getenv('FLASK_CONFIG', 'development'))
 
 
 if __name__ == "__main__":

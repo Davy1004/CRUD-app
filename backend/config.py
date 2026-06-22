@@ -28,8 +28,13 @@ class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        'DATABASE_URL', 'sqlite:///crud_app.db')
+
+    # Render provides DATABASE_URL as 'postgres://...', but SQLAlchemy 2.x
+    # only accepts 'postgresql://'. Rewrite the scheme if needed.
+    _db_url = os.environ.get('DATABASE_URL', 'sqlite:///crud_app.db')
+    if _db_url.startswith('postgres://'):
+        _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
+    SQLALCHEMY_DATABASE_URI = _db_url
 
 
 config = {
