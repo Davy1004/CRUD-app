@@ -1,5 +1,6 @@
 import time
 import traceback
+import os
 
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
@@ -15,6 +16,7 @@ from config import config
 from routes.user_routes import user_bp
 from routes.project_routes import project_bp
 from routes.task_routes import task_bp
+from routes.auth_routes import auth_bp
 from logger_config import LoggerSetup, get_logger
 
 # Initialize logger
@@ -36,8 +38,16 @@ def create_app(config_name='development'):
     # Initialize database
     db.init_app(app)
 
-    # Enable CORS
-    CORS(app)
+    # Enable CORS with credentials so the Vercel frontend can send/receive
+    # the session cookie. Wildcard origin is NOT allowed with credentials,
+    # so the frontend URL must be explicit. Set FRONTEND_ORIGIN on Render.
+    frontend_origin = os.getenv('FRONTEND_ORIGIN', 'http://localhost:4200')
+    CORS(app, supports_credentials=True, origins=[frontend_origin])
+
+    # Cross-origin session cookies require SameSite=None + Secure (HTTPS).
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
 
     # -------------------------
     # Request Logging
@@ -121,6 +131,10 @@ def create_app(config_name='development'):
         task_bp,
         url_prefix='/api'
     )
+    app.register_blueprint(
+        auth_bp,
+        url_prefix='/api'
+    )
 
     # -------------------------
     # Create Database Tables
@@ -138,7 +152,6 @@ def create_app(config_name='development'):
 # Global app instance for Gunicorn.
 # On Render, set FLASK_CONFIG=production so ProductionConfig (Postgres) is used.
 # Defaults to development locally.
-import os
 app = create_app(os.getenv('FLASK_CONFIG', 'development'))
 
 
