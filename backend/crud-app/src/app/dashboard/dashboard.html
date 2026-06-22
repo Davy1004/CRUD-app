@@ -1,1 +1,81 @@
-<p>dashboard works!</p>
+<div class="mt-4">
+  <div *ngIf="success" class="alert alert-success py-2">{{ success }}</div>
+
+  <div class="row">
+    <!-- Projects -->
+    <div class="col-md-5">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">Projects</div>
+        <div class="card-body">
+          <div *ngIf="projectError" class="alert alert-danger py-2">{{ projectError }}</div>
+          <div class="mb-2">
+            <input class="form-control mb-2" placeholder="Project name" [(ngModel)]="newProjectName" />
+            <input class="form-control mb-2" placeholder="Description (optional)" [(ngModel)]="newProjectDesc" />
+            <button class="btn btn-primary btn-sm" (click)="addProject()">Add Project</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="list-group">
+        <div *ngFor="let p of projects" class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ p.name }}</strong>
+            <span class="badge bg-secondary ms-2">{{ p.task_count }} tasks</span>
+            <div class="text-muted small">{{ p.description }}</div>
+          </div>
+          <button class="btn btn-outline-danger btn-sm" (click)="deleteProject(p.id!)">Delete</button>
+        </div>
+        <div *ngIf="!projects.length" class="text-muted">No projects yet.</div>
+      </div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="col-md-7">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">Tasks</div>
+        <div class="card-body">
+          <div *ngIf="taskError" class="alert alert-danger py-2">{{ taskError }}</div>
+          <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-5">
+              <input class="form-control" placeholder="Task title" [(ngModel)]="newTaskTitle" />
+            </div>
+            <div class="col-8 col-md-5">
+              <select class="form-select" [(ngModel)]="selectedProjectId">
+                <option *ngFor="let p of projects" [ngValue]="p.id">{{ p.name }}</option>
+              </select>
+            </div>
+            <div class="col-4 col-md-2">
+              <button class="btn btn-success w-100" (click)="addTask()">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-2 d-flex align-items-center gap-2">
+        <label class="mb-0">Filter:</label>
+        <select class="form-select w-auto" [(ngModel)]="filter" (change)="onFilterChange()">
+          <option value="all">All</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+        </select>
+      </div>
+
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr><th></th><th>Title</th><th>Project</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of tasks">
+            <td>
+              <input type="checkbox" class="form-check-input" [checked]="t.completed" (change)="toggleTask(t)" />
+            </td>
+            <td [class.text-decoration-line-through]="t.completed">{{ t.title }}</td>
+            <td class="text-muted small">{{ projectName(t.project_id) }}</td>
+            <td><button class="btn btn-outline-danger btn-sm" (click)="deleteTask(t.id!)">Delete</button></td>
+          </tr>
+          <tr *ngIf="!tasks.length"><td colspan="4" class="text-muted">No tasks.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

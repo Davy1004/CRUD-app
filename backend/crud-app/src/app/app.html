@@ -1,1 +1,11 @@
-<app-users></app-users>
+<nav class="navbar navbar-dark bg-dark px-3">
+  <span class="navbar-brand mb-0">Task &amp; Project Tracker</span>
+  <div class="d-flex align-items-center" *ngIf="auth.isLoggedIn()">
+    <span class="text-light me-3">Hi, {{ auth.username() }}</span>
+    <button class="btn btn-outline-light btn-sm" (click)="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="container">
+  <router-outlet></router-outlet>
+</div>
