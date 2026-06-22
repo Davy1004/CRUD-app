@@ -13,6 +13,8 @@ from models.project import Project
 from models.task import Task
 from config import config
 from routes.user_routes import user_bp
+from routes.project_routes import project_bp
+from routes.task_routes import task_bp
 from logger_config import LoggerSetup, get_logger
 
 # Initialize logger
@@ -109,6 +111,14 @@ def create_app(config_name='development'):
     # -------------------------
     app.register_blueprint(
         user_bp,
+        url_prefix='/api'
+    )
+    app.register_blueprint(
+        project_bp,
+        url_prefix='/api'
+    )
+    app.register_blueprint(
+        task_bp,
         url_prefix='/api'
     )
 
